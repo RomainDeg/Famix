@@ -179,6 +179,29 @@ MooseGroup >> removeAll: collection [
 	collection do: [ :each | self removeEntity: each ]
 ]
 
+{ #category : #'as yet unclassified' }
+MooseGroup >> resolveStubs [
+
+	| resolvedStubs resolverTool modelsToScan |
+	resolvedStubs := self class new.
+
+	resolverTool := FamixFusionnerJava new.
+	resolverTool consumerModel: self mooseModel.
+
+	modelsToScan := MooseModel root entities reject: [ :m |
+		                m = self mooseModel ].
+
+	self do: [ :e |
+		| resource |
+		modelsToScan do: [ :m |
+			1halt.
+			resolverTool resourceModel: m.
+			resource := resolverTool findResource: e.
+			resource ifNotNil: [ resolvedStubs add: resource ] ] ].
+	
+	^ resolvedStubs
+]
+
 { #category : #enumerating }
 MooseGroup >> select: aBlock [
 	^ self species withAll: (self entities select: aBlock)
